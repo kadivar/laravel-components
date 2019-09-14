@@ -18,18 +18,23 @@ class ComponentsServiceProvider extends ServiceProvider {
 			$components = config( "components.enable" ) ?: array_map( 'class_basename', $this->files->directories( app_path() . '/Components/' ) );
 			foreach ( $components as $component ) {
 				// Allow routes to be cached
-				if ( ! $this->app->routesAreCached() ) {
-					$routes = app_path() . '/Components/' . $component . '/routes.php';
-					if ( $this->files->exists( $routes ) ) {
-						include $routes;
-					}
-				}
 				$helper = app_path() . '/Components/' . $component . '/helper.php';
+				$routes = app_path() . '/Components/' . $component . '/routes';
 				$views  = app_path() . '/Components/' . $component . '/Views';
 				$trans  = app_path() . '/Components/' . $component . '/Translations';
 
 				if ( $this->files->exists( $helper ) ) {
 					include $helper;
+				}
+				if ( $this->files->isDirectory( $routes ) ) {
+					if ( ! $this->app->routesAreCached() ) {
+						if ( $this->files->exists( $routes . '/web.php' ) ) {
+							include $routes . '/web.php';
+						}
+						if ( $this->files->exists( $routes . '/api.php' ) ) {
+							include $routes . '/api.php';
+						}
+					}
 				}
 				if ( $this->files->isDirectory( $views ) ) {
 					$this->loadViewsFrom( $views, $component );
