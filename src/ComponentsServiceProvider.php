@@ -19,7 +19,7 @@ class ComponentsServiceProvider extends ServiceProvider {
 			foreach ( $components as $component ) {
 				// Allow routes to be cached
 				$helper = app_path() . '/Components/' . $component . '/helper.php';
-				$routes = app_path() . '/Components/' . $component . '/routes';
+				$routes = app_path() . '/Components/' . $component . '/Routes';
 				$views  = app_path() . '/Components/' . $component . '/Views';
 				$trans  = app_path() . '/Components/' . $component . '/Translations';
 

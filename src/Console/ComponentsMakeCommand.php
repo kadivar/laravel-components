@@ -194,7 +194,7 @@ class ComponentsMakeCommand extends GeneratorCommand {
 	 */
 	protected function getArguments() {
 		return array(
-			[ 'name', InputArgument::REQUIRED, 'Module name.' ],
+			[ 'name', InputArgument::REQUIRED, 'Component name.' ],
 		);
 	}
 
