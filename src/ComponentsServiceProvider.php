@@ -1,4 +1,6 @@
-<?php namespace Kadivar\Components;
+<?php
+
+namespace Kadivar\Components;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;

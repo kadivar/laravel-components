@@ -1,4 +1,6 @@
-<?php namespace Kadivar\Components\Console;
+<?php
+
+namespace Kadivar\Components\Console;
 
 use Illuminate\Console\GeneratorCommand;
 use Illuminate\Support\Str;
@@ -63,7 +65,7 @@ class ComponentsMakeCommand extends GeneratorCommand {
 		}
 
 		// Create Routes file
-		$this->generate( 'routes' );
+		$this->generate( 'route' );
 
 		// Create Helper file
 		$this->generate( 'helper' );
@@ -85,44 +87,70 @@ class ComponentsMakeCommand extends GeneratorCommand {
 
 		switch ( $type ) {
 			case 'controller':
-				$filename = Str::studly( class_basename( $this->getNameInput() ) . ucfirst( $type ) );
+				$file_name = Str::studly( class_basename( $this->getNameInput() ) . ucfirst( $type ) );
 				break;
 
 			case 'model':
-				$filename = Str::studly( class_basename( $this->getNameInput() ) );
+				$file_name = Str::studly( class_basename( $this->getNameInput() ) );
 				break;
 
 			case 'view':
-				$filename = 'index.blade';
+				$file_name = 'index.blade';
 				break;
 
 			case 'translation':
-				$filename = 'example';
+				$file_name = 'en';
 				break;
 
-			case 'routes':
-				$filename = 'routes';
+			case 'route':
+				$file_name = 'routes';
 				break;
 
 			case 'helper':
-				$filename = 'helper';
+				$file_name = 'helper';
 				break;
 			case 'request':
-				$filename = Str::studly( class_basename( $this->getNameInput() ) . ucfirst( $type ) );
+				$file_name = Str::studly( class_basename( $this->getNameInput() ) . ucfirst( $type ) );
 				break;
 		}
 
-		$folder = ( $type != 'routes' && $type != 'helper' ) ? ucfirst( $type ) . 's\\' . ( $type === 'translation' ? 'en\\' : '' ) : '';
+		$folder = ( $type != 'helper' ) ? ucfirst( $type ) . 's\\' . ( $type === 'translation' ? 'en\\' : '' ) : '';
+		$name   = $this->getFileClassNamespace( $folder, $file_name );
+		$path   = $this->getPath( $name );
 
-		$name = $name = (string) ( 'Components\\' . Str::studly( ucfirst( $this->getNameInput() ) ) . '\\' . $folder . $filename );
-		if ( $this->files->exists( $path = $this->getPath( $name ) ) ) {
+		if ( $this->files->exists( $path ) ) {
 			return $this->error( $this->type . ' already exists!' );
 		}
 
-		$this->currentStub = __DIR__ . '/stubs/' . $type . '.stub';
-
 		$this->makeDirectory( $path );
-		$this->files->put( $path, $this->buildClass( $name ) );
+
+		if ( $type == 'route' ) {
+			$name              = $this->getFileClassNamespace( $folder, 'web' );
+			$path              = $this->getPath( $name );
+			$this->currentStub = __DIR__ . '/stubs/web.stub';
+			$this->files->put( $path, $this->buildClass( $name ) );
+			$name              = $this->getFileClassNamespace( $folder, 'api' );
+			$path              = $this->getPath( $name );
+			$this->currentStub = __DIR__ . '/stubs/api.stub';
+			$this->files->put( $path, $this->buildClass( $name ) );
+		} else {
+			$this->currentStub = __DIR__ . '/stubs/api.stub';
+			$this->files->put( $path, $this->buildClass( $name ) );
+		}
+	}
+
+	/**
+	 * Get the class full namespace as string.
+	 *
+	 * @param  string $folder
+	 * @param  string $file_name
+	 *
+	 * @return string
+	 */
+	protected function getFileClassNamespace( $folder, $file_name ) {
+		$name = $name = (string) ( 'Components\\' . Str::studly( ucfirst( $this->getNameInput() ) ) . '\\' . $folder . $file_name );
+
+		return $name;
 	}
 
 	/**
