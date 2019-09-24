@@ -20,13 +20,19 @@ class ComponentsServiceProvider extends ServiceProvider {
 			$components = config( "components.enable" ) ?: array_map( 'class_basename', $this->files->directories( app_path() . '/Components/' ) );
 			foreach ( $components as $component ) {
 				// Allow routes to be cached
-				$helper = app_path() . '/Components/' . $component . '/helper.php';
-				$routes = app_path() . '/Components/' . $component . '/Routes';
-				$views  = app_path() . '/Components/' . $component . '/Views';
-				$trans  = app_path() . '/Components/' . $component . '/Translations';
+				$helper      = app_path() . '/Components/' . $component . '/helper.php';
+				$controllers = app_path() . '/Components/' . $component . '/Controllers';
+				$routes      = app_path() . '/Components/' . $component . '/Routes';
+				$views       = app_path() . '/Components/' . $component . '/Views';
+				$trans       = app_path() . '/Components/' . $component . '/Translations';
 
 				if ( $this->files->exists( $helper ) ) {
 					include $helper;
+				}
+				if ( $this->files->isDirectory( $controllers ) ) {
+					foreach ( glob( $controllers . '/*.php' ) as $filename ) {
+						include $filename;
+					}
 				}
 				if ( $this->files->isDirectory( $routes ) ) {
 					if ( ! $this->app->routesAreCached() ) {
