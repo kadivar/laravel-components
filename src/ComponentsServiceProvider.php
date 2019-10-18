@@ -27,6 +27,7 @@ class ComponentsServiceProvider extends ServiceProvider
                 $views = app_path().'/Components/'.$component.'/Views';
                 $requests = app_path().'/Components/'.$component.'/Requests';
                 $routes = app_path().'/Components/'.$component.'/Routes';
+                $api_resources = app_path().'/Components/'.$component.'/Resources/api';
                 $controllers = app_path().'/Components/'.$component.'/Controllers';
 
                 if ($this->files->exists($helper)) {
@@ -51,6 +52,11 @@ class ComponentsServiceProvider extends ServiceProvider
                         if ($this->files->exists($routes.'/api.php')) {
                             include $routes.'/api.php';
                         }
+                    }
+                }
+                if ($this->files->isDirectory($api_resources)) {
+                    foreach (glob($api_resources.'/*.php') as $filename) {
+                        include $filename;
                     }
                 }
                 if ($this->files->isDirectory($controllers)) {
