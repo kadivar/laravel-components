@@ -22,6 +22,7 @@ class ComponentsServiceProvider extends ServiceProvider
                 $this->files->directories(app_path().'/Components/'));
             foreach ($components as $component) {
                 // Allow routes to be cached
+                $models = app_path().'/Components/'.$component.'/Models';
                 $helper = app_path().'/Components/'.$component.'/helper.php';
                 $trans = app_path().'/Components/'.$component.'/Translations';
                 $views = app_path().'/Components/'.$component.'/Views';
@@ -30,6 +31,11 @@ class ComponentsServiceProvider extends ServiceProvider
                 $api_resources = app_path().'/Components/'.$component.'/Resources/api';
                 $controllers = app_path().'/Components/'.$component.'/Controllers';
 
+                if ($this->files->isDirectory($models)) {
+                    foreach (glob($models.'/*.php') as $filename) {
+                        include $filename;
+                    }
+                }
                 if ($this->files->exists($helper)) {
                     include $helper;
                 }
