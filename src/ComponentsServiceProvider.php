@@ -22,6 +22,9 @@ class ComponentsServiceProvider extends ServiceProvider
                 $this->files->directories(app_path().'/Components/'));
             foreach ($components as $component) {
                 // Allow routes to be cached
+                $migrations = app_path().'/Components/'.$component.'/Migrations';
+                $factories = app_path().'/Components/'.$component.'/Factories';
+                $seeds = app_path().'/Components/'.$component.'/Seeds';
                 $models = app_path().'/Components/'.$component.'/Models';
                 $helper = app_path().'/Components/'.$component.'/helper.php';
                 $trans = app_path().'/Components/'.$component.'/Translations';
@@ -31,8 +34,21 @@ class ComponentsServiceProvider extends ServiceProvider
                 $api_resources = app_path().'/Components/'.$component.'/Resources/api';
                 $controllers = app_path().'/Components/'.$component.'/Controllers';
 
+                if ($this->files->isDirectory($migrations)) {
+                    $this->loadMigrationsFrom($migrations);
+                }
                 if ($this->files->isDirectory($models)) {
                     foreach (glob($models.'/*.php') as $filename) {
+                        include $filename;
+                    }
+                }
+                if ($this->files->isDirectory($factories)) {
+                    foreach (glob($factories.'/*.php') as $filename) {
+                        include $filename;
+                    }
+                }
+                if ($this->files->isDirectory($seeds)) {
+                    foreach (glob($seeds.'/*.php') as $filename) {
                         include $filename;
                     }
                 }
