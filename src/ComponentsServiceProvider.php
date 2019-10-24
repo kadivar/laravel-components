@@ -2,6 +2,7 @@
 
 namespace Kadivar\Components;
 
+use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
 
@@ -43,9 +44,7 @@ class ComponentsServiceProvider extends ServiceProvider
                     }
                 }
                 if ($this->files->isDirectory($factories)) {
-                    foreach (glob($factories.'/*.php') as $filename) {
-                        include $filename;
-                    }
+                    $this->app->make(EloquentFactory::class)->load($factories);
                 }
                 if ($this->files->isDirectory($seeds)) {
                     foreach (glob($seeds.'/*.php') as $filename) {
@@ -97,7 +96,6 @@ class ComponentsServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
         $this->files = new Filesystem;
         $this->registerMakeCommand();
     }
@@ -109,11 +107,8 @@ class ComponentsServiceProvider extends ServiceProvider
      */
     protected function registerMakeCommand()
     {
-
         $this->commands('components.make');
-
         $bind_method = method_exists($this->app, 'bindShared') ? 'bindShared' : 'singleton';
-
         $this->app->{$bind_method}('components.make', function ($app) {
             return new Console\ComponentsMakeCommand($this->files);
         });
