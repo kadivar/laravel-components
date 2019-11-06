@@ -40,7 +40,7 @@ class ComponentsServiceProvider extends ServiceProvider
                 }
                 if ($this->files->isDirectory($models)) {
                     foreach (glob($models.'/*.php') as $filename) {
-                        include $filename;
+                        include_once $filename;
                     }
                 }
                 if ($this->files->isDirectory($factories)) {
@@ -48,11 +48,11 @@ class ComponentsServiceProvider extends ServiceProvider
                 }
                 if ($this->files->isDirectory($seeds)) {
                     foreach (glob($seeds.'/*.php') as $filename) {
-                        include $filename;
+                        include_once $filename;
                     }
                 }
                 if ($this->files->exists($helper)) {
-                    include $helper;
+                    include_once $helper;
                 }
                 if ($this->files->isDirectory($trans)) {
                     $this->loadTranslationsFrom($trans, $component);
@@ -62,7 +62,7 @@ class ComponentsServiceProvider extends ServiceProvider
                 }
                 if ($this->files->isDirectory($requests)) {
                     foreach (glob($requests.'/*.php') as $filename) {
-                        include $filename;
+                        include_once $filename;
                     }
                 }
                 if ($this->files->isDirectory($routes)) {
@@ -77,12 +77,12 @@ class ComponentsServiceProvider extends ServiceProvider
                 }
                 if ($this->files->isDirectory($api_resources)) {
                     foreach (glob($api_resources.'/*.php') as $filename) {
-                        include $filename;
+                        include_once $filename;
                     }
                 }
                 if ($this->files->isDirectory($controllers)) {
                     foreach (glob($controllers.'/*.php') as $filename) {
-                        include $filename;
+                        include_once $filename;
                     }
                 }
             }
