@@ -25,7 +25,7 @@ class ComponentsServiceProvider extends ServiceProvider
                 // Allow routes to be cached
                 $migrations = app_path().'/Components/'.$component.'/Migrations';
                 $factories = app_path().'/Components/'.$component.'/Factories';
-                $seeds = app_path().'/Components/'.$component.'/Seeds';
+                $seeders = app_path().'/Components/'.$component.'/Seeders';
                 $models = app_path().'/Components/'.$component.'/Models';
                 $helper = app_path().'/Components/'.$component.'/helper.php';
                 $trans = app_path().'/Components/'.$component.'/Translations';
@@ -46,8 +46,8 @@ class ComponentsServiceProvider extends ServiceProvider
                 if ($this->files->isDirectory($factories)) {
                     $this->app->make(EloquentFactory::class)->load($factories);
                 }
-                if ($this->files->isDirectory($seeds)) {
-                    foreach (glob($seeds.'/*.php') as $filename) {
+                if ($this->files->isDirectory($seeders)) {
+                    foreach (glob($seeders.'/*.php') as $filename) {
                         include_once $filename;
                     }
                 }

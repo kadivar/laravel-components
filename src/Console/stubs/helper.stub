@@ -2,3 +2,8 @@
  /**
  *	DummyUCtitle Helper  
  */
+ namespace DummyNamespace;
+
+ use Illuminate\Http\Exceptions\HttpResponseException;
+ use Illuminate\Pagination\LengthAwarePaginator;
+ use Illuminate\Support\Arr;
