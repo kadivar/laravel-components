@@ -9,7 +9,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 class ComponentsMakeCommand extends GeneratorCommand
 {
-
     /**
      * The console command name.
      *
@@ -32,6 +31,13 @@ class ComponentsMakeCommand extends GeneratorCommand
     protected $type = 'Component';
 
     /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'make:component {name}  {--migration} {--translation}';
+
+    /**
      * The current stub.
      *
      * @var string
@@ -46,7 +52,9 @@ class ComponentsMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
-        // check if component exists
+        parent::handle();
+
+        // Check if component exists
         if ($this->files->exists(app_path().'/Components/'.$this->getNameInput())) {
             return $this->error($this->type.' already exists!');
         }
@@ -60,9 +68,8 @@ class ComponentsMakeCommand extends GeneratorCommand
         // Create Views folder
         $this->generate('view');
 
-        //Flag for no translation
-        if ($this->option('translation')) // Create Translations folder
-        {
+        // Create translations
+        if (!$this->option('no-translation')) {
             $this->generate('translation');
         }
 
@@ -75,26 +82,34 @@ class ComponentsMakeCommand extends GeneratorCommand
         // Create Request Folder
         $this->generate('request');
 
-
-        if ($this->option('migration')) {
-            $table = Str::plural(Str::snake(class_basename($this->argument('name'))));
-            $this->call('make:migration', ['name' => "create_{$table}_table", '--create' => $table]);
+        // Create migrations
+        if (!$this->option('no-migration')) {
+            $this->generate('migration');
         }
 
         $this->info($this->type.' created successfully.');
     }
 
-
+    /**
+     * Core logic.
+     *
+     */
     protected function generate($type)
     {
-
         switch ($type) {
-            case 'controller':
-                $file_name = Str::studly(class_basename($this->getNameInput()).ucfirst($type));
-                break;
-
             case 'model':
                 $file_name = Str::studly(class_basename($this->getNameInput()));
+                break;
+
+            case 'migration':
+                $component_name = $this->argument('name');
+                $table = Str::plural(Str::snake(class_basename($this->argument('name'))));
+                $path = app_path().'/Components/'.$component_name.'/Migrations';
+                $this->call('make:migration', [
+                    'name' => "create_{$table}_table",
+                    '--create' => $table,
+                    '--path' => $path
+                ]);
                 break;
 
             case 'view':
@@ -112,7 +127,8 @@ class ComponentsMakeCommand extends GeneratorCommand
             case 'helper':
                 $file_name = 'helper';
                 break;
-            case 'request':
+
+            default:
                 $file_name = Str::studly(class_basename($this->getNameInput()).ucfirst($type));
                 break;
         }
@@ -150,7 +166,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getFileClassNamespace($folder, $file_name)
+    protected function getFileClassNamespace($folder, $file_name): string
     {
         $name = $name = (string) ('Components\\'.Str::studly(ucfirst($this->getNameInput())).'\\'.$folder.$file_name);
 
@@ -164,7 +180,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function buildClass($name)
+    protected function buildClass($name): string
     {
         $stub = $this->files->get($this->getStub());
 
@@ -177,7 +193,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getStub()
+    protected function getStub(): string
     {
         return $this->currentStub;
     }
@@ -190,7 +206,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function replaceName(&$stub, $name)
+    protected function replaceName(&$stub, $name): string
     {
         $stub = str_replace('DummyTitle', $name, $stub);
         $stub = str_replace('DummyUCtitle', ucfirst(Str::studly($name)), $stub);
@@ -205,7 +221,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function getNamespace($name)
+    protected function getNamespace($name): string
     {
         return trim(implode('\\', array_map('ucfirst', array_slice(explode('\\', Str::studly($name)), 0, -1))), '\\');
     }
@@ -218,7 +234,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return string
      */
-    protected function replaceClass($stub, $name)
+    protected function replaceClass($stub, $name): string
     {
         $class = class_basename($name);
 
@@ -230,7 +246,7 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return array
      */
-    protected function getArguments()
+    protected function getArguments(): array
     {
         return array(
             ['name', InputArgument::REQUIRED, 'Component name.'],
@@ -242,11 +258,11 @@ class ComponentsMakeCommand extends GeneratorCommand
      *
      * @return array
      */
-    protected function getOptions()
+    protected function getOptions(): array
     {
         return array(
-            ['migration', null, InputOption::VALUE_NONE, 'Create new migration files.'],
-            ['translation', null, InputOption::VALUE_NONE, 'Create component translation filesystem.'],
+            ['no-migration', null, InputOption::VALUE_NONE, 'Create new without migration files.'],
+            ['no-translation', null, InputOption::VALUE_NONE, 'Create component without translation files.'],
         );
     }
 

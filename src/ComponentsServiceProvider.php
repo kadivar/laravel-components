@@ -5,6 +5,7 @@ namespace Kadivar\Components;
 use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
+use Kadivar\Components\Console\ComponentsMakeCommand;
 
 class ComponentsServiceProvider extends ServiceProvider
 {
@@ -27,12 +28,12 @@ class ComponentsServiceProvider extends ServiceProvider
                 $factories = app_path().'/Components/'.$component.'/Factories';
                 $seeders = app_path().'/Components/'.$component.'/Seeders';
                 $models = app_path().'/Components/'.$component.'/Models';
-                $helper = app_path().'/Components/'.$component.'/helper.php';
+                $helpers = app_path().'/Components/'.$component.'/Helpers';
                 $trans = app_path().'/Components/'.$component.'/Translations';
                 $views = app_path().'/Components/'.$component.'/Views';
                 $requests = app_path().'/Components/'.$component.'/Requests';
                 $routes = app_path().'/Components/'.$component.'/Routes';
-                $api_resources = app_path().'/Components/'.$component.'/Resources/api';
+                $api_resources = app_path().'/Components/'.$component.'/Resources/Api';
                 $controllers = app_path().'/Components/'.$component.'/Controllers';
 
                 if ($this->files->isDirectory($migrations)) {
@@ -51,8 +52,10 @@ class ComponentsServiceProvider extends ServiceProvider
                         include_once $filename;
                     }
                 }
-                if ($this->files->exists($helper)) {
-                    include_once $helper;
+                if ($this->files->isDirectory($helpers)) {
+                    foreach (glob($models.'/*.php') as $filename) {
+                        include_once $filename;
+                    }
                 }
                 if ($this->files->isDirectory($trans)) {
                     $this->loadTranslationsFrom($trans, $component);
@@ -87,6 +90,12 @@ class ComponentsServiceProvider extends ServiceProvider
                 }
             }
         }
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ComponentsMakeCommand::class,
+            ]);
+        }
     }
 
     /**
@@ -97,21 +106,6 @@ class ComponentsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->files = new Filesystem;
-        $this->registerMakeCommand();
-    }
-
-    /**
-     * Register the "make:component" console command.
-     *
-     * @return Console\ComponentsMakeCommand
-     */
-    protected function registerMakeCommand()
-    {
-        $this->commands('components.make');
-        $bind_method = method_exists($this->app, 'bindShared') ? 'bindShared' : 'singleton';
-        $this->app->{$bind_method}('components.make', function ($app) {
-            return new Console\ComponentsMakeCommand($this->files);
-        });
     }
 
 }
